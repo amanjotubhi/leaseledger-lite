@@ -1,0 +1,44 @@
+<div class="app-container">
+  <!-- Header with Navigation -->
+  <header class="app-header">
+    <div class="header-backdrop"></div>
+    <div class="header-content">
+      <div class="logo-section">
+        <div class="logo-container">
+          <div class="logo-circle">
+            <span class="logo-icon">📊</span>
+          </div>
+        </div>
+        <div class="logo-text">
+          <h1 class="app-title">LeaseLedger Lite</h1>
+          <p class="app-subtitle">Leasing Agent Portal</p>
+        </div>
+      </div>
+      <nav class="main-nav">
+        <a 
+          *ngFor="let item of navItems"
+          [routerLink]="item.path"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{exact: false}"
+          class="nav-item">
+          <span class="nav-icon">{{ item.icon }}</span>
+          <span class="nav-label">{{ item.label }}</span>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content with Router Outlet -->
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-content">
+      <p class="footer-text">© 2024 LeaseLedger Lite</p>
+      <div class="footer-divider"></div>
+      <p class="footer-note">Powered by FastAPI & Angular</p>
+    </div>
+  </footer>
+</div>

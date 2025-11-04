@@ -1,0 +1,150 @@
+<div class="page-container">
+  <div class="page-header">
+    <div class="header-icon">💰</div>
+    <div>
+      <h1 class="page-title">Financial Analysis & Insights</h1>
+      <p class="page-subtitle">Revenue metrics, collection performance, and projections</p>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading-overlay">
+    <div class="apple-spinner">
+      <div class="spinner-ring"></div>
+      <div class="spinner-ring"></div>
+      <div class="spinner-ring"></div>
+    </div>
+    <p class="loading-text">Analyzing financial data...</p>
+  </div>
+
+  <div *ngIf="insights && !loading" class="content-grid">
+    <!-- Revenue Overview -->
+    <section class="insight-section">
+      <h2 class="section-title">📊 Revenue Overview</h2>
+      <div class="metrics-grid">
+        <div class="metric-card large">
+          <div class="metric-icon revenue">💵</div>
+          <div class="metric-content">
+            <h3 class="metric-label">Total Charges</h3>
+            <p class="metric-value huge">{{ formatCurrency(insights.revenue.total_charges) }}</p>
+            <p class="metric-subvalue">Current month billing</p>
+          </div>
+        </div>
+        
+        <div class="metric-card large">
+          <div class="metric-icon payments">💳</div>
+          <div class="metric-content">
+            <h3 class="metric-label">Total Payments</h3>
+            <p class="metric-value huge">{{ formatCurrency(insights.revenue.total_payments) }}</p>
+            <p class="metric-subvalue">Collected this month</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-icon outstanding">📋</div>
+          <div class="metric-content">
+            <h3 class="metric-label">Outstanding Balance</h3>
+            <p class="metric-value" [class.negative]="insights.revenue.outstanding > 0">
+              {{ formatCurrency(insights.revenue.outstanding) }}
+            </p>
+          </div>
+        </div>
+        
+        <div class="metric-card">
+          <div class="metric-icon collection" [ngClass]="getCollectionRateClass(insights.revenue.collection_rate)">
+            <span>📈</span>
+          </div>
+          <div class="metric-content">
+            <h3 class="metric-label">Collection Rate</h3>
+            <p class="metric-value" [ngClass]="getCollectionRateClass(insights.revenue.collection_rate)">
+              {{ insights.revenue.collection_rate }}%
+            </p>
+            <p class="metric-subvalue" [ngClass]="getCollectionRateClass(insights.revenue.collection_rate)">
+              {{ insights.revenue.collection_rate >= 95 ? 'Excellent' : insights.revenue.collection_rate >= 85 ? 'Good' : insights.revenue.collection_rate >= 75 ? 'Fair' : 'Needs Improvement' }}
+            </p>
+          </div>
+        </div>
+        
+        <div class="metric-card">
+          <div class="metric-icon avg-lease">📊</div>
+          <div class="metric-content">
+            <h3 class="metric-label">Avg Lease Value</h3>
+            <p class="metric-value">{{ formatCurrency(insights.revenue.avg_lease_value) }}</p>
+            <p class="metric-subvalue">Per lease monthly</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Projections -->
+    <section class="insight-section">
+      <h2 class="section-title">🔮 Revenue Projections</h2>
+      <div class="analysis-card">
+        <div class="projection-grid">
+          <div class="projection-item">
+            <div class="projection-label">Next Month Projection</div>
+            <div class="projection-value">{{ formatCurrency(insights.projections.next_month_projected) }}</div>
+            <div class="projection-growth positive">
+              <span class="growth-icon">↗</span>
+              {{ insights.projections.growth_rate }}% growth
+            </div>
+          </div>
+          
+          <div class="projection-item">
+            <div class="projection-label">Annualized Revenue</div>
+            <div class="projection-value">{{ formatCurrency(insights.projections.next_month_projected * 12) }}</div>
+            <div class="projection-note">Based on current projections</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Recommendations -->
+    <section class="insight-section">
+      <h2 class="section-title">💡 Strategic Recommendations</h2>
+      <div class="analysis-card">
+        <div class="recommendations-list">
+          <div class="recommendation-item" *ngFor="let rec of insights.recommendations; let i = index">
+            <div class="rec-number">{{ i + 1 }}</div>
+            <div class="rec-content">
+              <p>{{ rec }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Financial Health Score -->
+    <section class="insight-section">
+      <h2 class="section-title">🏥 Financial Health Score</h2>
+      <div class="analysis-card">
+        <div class="health-score">
+          <div class="score-circle" [ngClass]="getCollectionRateClass(insights.revenue.collection_rate)">
+            <div class="score-value">{{ insights.revenue.collection_rate }}</div>
+            <div class="score-label">Score</div>
+          </div>
+          <div class="score-details">
+            <div class="score-item">
+              <span class="score-label">Collection Rate</span>
+              <span class="score-bar">
+                <div class="score-fill" [ngClass]="getCollectionRateClass(insights.revenue.collection_rate)" 
+                     [style.width.%]="insights.revenue.collection_rate"></div>
+              </span>
+              <span class="score-value-text">{{ insights.revenue.collection_rate }}%</span>
+            </div>
+            <div class="score-item">
+              <span class="score-label">Outstanding Balance</span>
+              <span class="score-value-text">{{ formatCurrency(insights.revenue.outstanding) }}</span>
+            </div>
+            <div class="score-item">
+              <span class="score-label">Average Lease Value</span>
+              <span class="score-value-text">{{ formatCurrency(insights.revenue.avg_lease_value) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+

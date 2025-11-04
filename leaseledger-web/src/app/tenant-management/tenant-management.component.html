@@ -1,0 +1,197 @@
+<div class="page-container">
+  <div class="page-header">
+    <div class="header-icon">👥</div>
+    <div>
+      <h1 class="page-title">Tenant Management & Analysis</h1>
+      <p class="page-subtitle">Comprehensive tenant insights and risk assessment</p>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading-overlay">
+    <div class="apple-spinner">
+      <div class="spinner-ring"></div>
+      <div class="spinner-ring"></div>
+      <div class="spinner-ring"></div>
+    </div>
+    <p class="loading-text">Analyzing tenant data...</p>
+  </div>
+
+  <div *ngIf="analysis && !loading" class="content-grid">
+    <!-- Summary Cards -->
+    <section class="insight-section">
+      <h2 class="section-title">📊 Tenant Overview</h2>
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-icon total">👥</div>
+          <div class="metric-content">
+            <h3 class="metric-label">Total Tenants</h3>
+            <p class="metric-value">{{ analysis.summary.total_tenants }}</p>
+          </div>
+        </div>
+        
+        <div class="metric-card">
+          <div class="metric-icon active">✅</div>
+          <div class="metric-content">
+            <h3 class="metric-label">Active Leases</h3>
+            <p class="metric-value">{{ analysis.summary.active_leases }}</p>
+            <p class="metric-subvalue">{{ (analysis.summary.active_leases / analysis.summary.total_tenants * 100).toFixed(1) }}% of portfolio</p>
+          </div>
+        </div>
+        
+        <div class="metric-card">
+          <div class="metric-icon at-risk" [ngClass]="getRiskLevel(analysis.summary.at_risk_count, analysis.summary.total_tenants)">
+            <span>⚠️</span>
+          </div>
+          <div class="metric-content">
+            <h3 class="metric-label">At Risk Tenants</h3>
+            <p class="metric-value">{{ analysis.summary.at_risk_count }}</p>
+            <p class="metric-subvalue">{{ (analysis.summary.at_risk_count / analysis.summary.total_tenants * 100).toFixed(1) }}% need attention</p>
+          </div>
+        </div>
+        
+        <div class="metric-card">
+          <div class="metric-icon payment">💳</div>
+          <div class="metric-content">
+            <h3 class="metric-label">On-Time Payment Rate</h3>
+            <p class="metric-value">{{ analysis.summary.on_time_payment_rate }}%</p>
+            <p class="metric-subvalue" [class.good]="analysis.summary.on_time_payment_rate >= 90">
+              {{ analysis.summary.on_time_payment_rate >= 90 ? 'Excellent' : analysis.summary.on_time_payment_rate >= 75 ? 'Good' : 'Needs Improvement' }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Top Tenants by Balance -->
+    <section class="insight-section">
+      <h2 class="section-title">🔝 Top Tenants by Outstanding Balance</h2>
+      <div class="analysis-card">
+        <div class="table-container">
+          <table class="analysis-table">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Tenant</th>
+                <th>Unit</th>
+                <th class="text-right">Charges</th>
+                <th class="text-right">Payments</th>
+                <th class="text-right">Balance</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let tenant of analysis.top_tenants; let i = index">
+                <td class="rank-cell">
+                  <span class="rank-badge" [class.top]="i === 0">{{ i + 1 }}</span>
+                </td>
+                <td class="tenant-cell">
+                  <div class="tenant-avatar">{{ tenant.tenant_name.charAt(0) }}</div>
+                  {{ tenant.tenant_name }}
+                </td>
+                <td>{{ tenant.unit_no }}</td>
+                <td class="text-right">{{ tenant.monthly_charges }}</td>
+                <td class="text-right">{{ tenant.monthly_payments }}</td>
+                <td class="text-right">
+                  <span class="balance-badge" [class.negative]="parseFloat(tenant.month_balance.replace('$', '') || '0') > 0">
+                    {{ tenant.month_balance }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Aging Breakdown -->
+    <section class="insight-section">
+      <h2 class="section-title">📈 Aging Analysis</h2>
+      <div class="analysis-card">
+        <div class="aging-breakdown">
+          <div class="aging-item">
+            <div class="aging-header">
+              <span class="aging-label">0-30 Days</span>
+              <span class="aging-amount">{{ formatCurrency(analysis.aging_breakdown.by_bucket['0_30']) }}</span>
+            </div>
+            <div class="aging-bar">
+              <div class="aging-fill early" [style.width.%]="(analysis.aging_breakdown.by_bucket['0_30'] / analysis.aging_breakdown.total_overdue * 100) || 0"></div>
+            </div>
+          </div>
+          
+          <div class="aging-item">
+            <div class="aging-header">
+              <span class="aging-label">31-60 Days</span>
+              <span class="aging-amount">{{ formatCurrency(analysis.aging_breakdown.by_bucket['31_60']) }}</span>
+            </div>
+            <div class="aging-bar">
+              <div class="aging-fill moderate" [style.width.%]="(analysis.aging_breakdown.by_bucket['31_60'] / analysis.aging_breakdown.total_overdue * 100) || 0"></div>
+            </div>
+          </div>
+          
+          <div class="aging-item">
+            <div class="aging-header">
+              <span class="aging-label">61-90 Days</span>
+              <span class="aging-amount">{{ formatCurrency(analysis.aging_breakdown.by_bucket['61_90']) }}</span>
+            </div>
+            <div class="aging-bar">
+              <div class="aging-fill high" [style.width.%]="(analysis.aging_breakdown.by_bucket['61_90'] / analysis.aging_breakdown.total_overdue * 100) || 0"></div>
+            </div>
+          </div>
+          
+          <div class="aging-item">
+            <div class="aging-header">
+              <span class="aging-label">90+ Days</span>
+              <span class="aging-amount critical">{{ formatCurrency(analysis.aging_breakdown.by_bucket['90_plus']) }}</span>
+            </div>
+            <div class="aging-bar">
+              <div class="aging-fill critical" [style.width.%]="(analysis.aging_breakdown.by_bucket['90_plus'] / analysis.aging_breakdown.total_overdue * 100) || 0"></div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="total-overdue">
+          <span class="total-label">Total Overdue:</span>
+          <span class="total-value">{{ formatCurrency(analysis.aging_breakdown.total_overdue) }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Action Items -->
+    <section class="insight-section">
+      <h2 class="section-title">💡 Recommended Actions</h2>
+      <div class="action-card">
+        <div class="action-item" *ngIf="analysis.summary.at_risk_count > 0">
+          <div class="action-icon priority">🔴</div>
+          <div class="action-content">
+            <h3>Immediate Attention Required</h3>
+            <p>{{ analysis.summary.at_risk_count }} tenant(s) have outstanding balances. Contact them to establish payment plans.</p>
+          </div>
+        </div>
+        
+        <div class="action-item" *ngIf="analysis.aging_breakdown.by_bucket['90_plus'] > 0">
+          <div class="action-icon urgent">⚠️</div>
+          <div class="action-content">
+            <h3>Critical Overdue Accounts</h3>
+            <p>{{ formatCurrency(analysis.aging_breakdown.by_bucket['90_plus']) }} in accounts over 90 days past due. Consider legal action for persistent non-payment.</p>
+          </div>
+        </div>
+        
+        <div class="action-item" *ngIf="analysis.summary.on_time_payment_rate < 90">
+          <div class="action-icon improvement">📈</div>
+          <div class="action-content">
+            <h3>Payment Behavior Improvement</h3>
+            <p>Current on-time payment rate is {{ analysis.summary.on_time_payment_rate }}%. Consider implementing payment reminders or incentives.</p>
+          </div>
+        </div>
+        
+        <div class="action-item" *ngIf="analysis.summary.on_time_payment_rate >= 90">
+          <div class="action-icon success">✅</div>
+          <div class="action-content">
+            <h3>Excellent Payment Performance</h3>
+            <p>Your tenants are maintaining a {{ analysis.summary.on_time_payment_rate }}% on-time payment rate. Keep up the great work!</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+

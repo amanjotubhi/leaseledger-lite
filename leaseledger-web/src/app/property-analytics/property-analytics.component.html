@@ -1,0 +1,164 @@
+<div class="page-container">
+  <div class="page-header">
+    <div class="header-icon">🏢</div>
+    <div>
+      <h1 class="page-title">Property Analytics & Performance</h1>
+      <p class="page-subtitle">Occupancy rates, unit performance, and revenue optimization</p>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading-overlay">
+    <div class="apple-spinner">
+      <div class="spinner-ring"></div>
+      <div class="spinner-ring"></div>
+      <div class="spinner-ring"></div>
+    </div>
+    <p class="loading-text">Analyzing property metrics...</p>
+  </div>
+
+  <div *ngIf="metrics && !loading" class="content-grid">
+    <!-- Occupancy Metrics -->
+    <section class="insight-section">
+      <h2 class="section-title">🏠 Occupancy Metrics</h2>
+      <div class="metrics-grid">
+        <div class="metric-card large">
+          <div class="metric-icon occupancy" [ngClass]="getOccupancyClass(metrics.occupancy.occupancy_rate)">
+            <span>📊</span>
+          </div>
+          <div class="metric-content">
+            <h3 class="metric-label">Occupancy Rate</h3>
+            <p class="metric-value huge" [ngClass]="getOccupancyClass(metrics.occupancy.occupancy_rate)">
+              {{ metrics.occupancy.occupancy_rate }}%
+            </p>
+            <p class="metric-subvalue">{{ metrics.occupancy.occupied }} of {{ metrics.occupancy.total_units }} units occupied</p>
+          </div>
+        </div>
+        
+        <div class="metric-card">
+          <div class="metric-icon vacant">🏚️</div>
+          <div class="metric-content">
+            <h3 class="metric-label">Vacant Units</h3>
+            <p class="metric-value">{{ metrics.occupancy.vacant }}</p>
+            <p class="metric-subvalue">Available for lease</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Revenue Metrics -->
+    <section class="insight-section">
+      <h2 class="section-title">💰 Revenue Performance</h2>
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-icon revenue">💵</div>
+          <div class="metric-content">
+            <h3 class="metric-label">Monthly Revenue</h3>
+            <p class="metric-value">{{ formatCurrency(metrics.revenue.total_monthly) }}</p>
+          </div>
+        </div>
+        
+        <div class="metric-card">
+          <div class="metric-icon per-unit">📈</div>
+          <div class="metric-content">
+            <h3 class="metric-label">Revenue per Unit</h3>
+            <p class="metric-value">{{ formatCurrency(metrics.revenue.per_unit) }}</p>
+            <p class="metric-subvalue">Average monthly</p>
+          </div>
+        </div>
+        
+        <div class="metric-card">
+          <div class="metric-icon annual">📅</div>
+          <div class="metric-content">
+            <h3 class="metric-label">Annualized Revenue</h3>
+            <p class="metric-value">{{ formatCurrency(metrics.revenue.annualized) }}</p>
+            <p class="metric-subvalue">Projected annual</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Top Performing Units -->
+    <section class="insight-section">
+      <h2 class="section-title">🏆 Top Performing Units</h2>
+      <div class="analysis-card">
+        <div class="units-grid">
+          <div class="unit-card" *ngFor="let unit of metrics.top_units; let i = index">
+            <div class="unit-rank">
+              <span class="rank-badge" [class.top]="i === 0">{{ i + 1 }}</span>
+            </div>
+            <div class="unit-info">
+              <h3 class="unit-number">Unit {{ unit.unit }}</h3>
+              <div class="unit-metrics">
+                <div class="unit-metric">
+                  <span class="metric-label-small">Revenue</span>
+                  <span class="metric-value-small">{{ formatCurrency(unit.revenue) }}</span>
+                </div>
+                <div class="unit-metric">
+                  <span class="metric-label-small">Balance</span>
+                  <span class="metric-value-small" [class.negative]="unit.balance > 0">
+                    {{ formatCurrency(unit.balance) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="unit-status" [class.excellent]="unit.balance <= 0">
+              <span *ngIf="unit.balance <= 0">✅</span>
+              <span *ngIf="unit.balance > 0">⚠️</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Key Insights -->
+    <section class="insight-section">
+      <h2 class="section-title">💡 Property Insights</h2>
+      <div class="analysis-card">
+        <div class="insights-list">
+          <div class="insight-item" *ngFor="let insight of metrics.insights">
+            <div class="insight-icon">💡</div>
+            <div class="insight-content">
+              <p>{{ insight }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Occupancy Visualization -->
+    <section class="insight-section">
+      <h2 class="section-title">📊 Occupancy Breakdown</h2>
+      <div class="analysis-card">
+        <div class="occupancy-visual">
+          <div class="visual-item">
+            <div class="visual-bar">
+              <div class="visual-fill occupied" [style.width.%]="(metrics.occupancy.occupied / metrics.occupancy.total_units * 100) || 0">
+                <span class="visual-label">{{ metrics.occupancy.occupied }} Occupied</span>
+              </div>
+            </div>
+          </div>
+          <div class="visual-item">
+            <div class="visual-bar">
+              <div class="visual-fill vacant" [style.width.%]="(metrics.occupancy.vacant / metrics.occupancy.total_units * 100) || 0">
+                <span class="visual-label">{{ metrics.occupancy.vacant }} Vacant</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="visual-summary">
+          <div class="summary-item">
+            <span class="summary-label">Total Units:</span>
+            <span class="summary-value">{{ metrics.occupancy.total_units }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Occupancy Rate:</span>
+            <span class="summary-value" [ngClass]="getOccupancyClass(metrics.occupancy.occupancy_rate)">
+              {{ metrics.occupancy.occupancy_rate }}%
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
