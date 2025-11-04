@@ -1,8 +1,13 @@
 #!/bin/bash
 # Quick deployment script - runs all setup steps
-# Run this on your EC2 instance after uploading files
+# Run this on your EC2 instance after cloning from GitHub
 
 set -e
+
+# Get the directory where the script is located
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+cd "$PROJECT_ROOT"
 
 echo "🚀 Quick Deploy LeaseLedger Lite on EC2"
 echo "========================================"
