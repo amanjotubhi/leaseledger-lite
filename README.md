@@ -180,7 +180,6 @@ This project is created for demonstration purposes.
 
 ## 🙏 Acknowledgments
 
-- Built for Yardi interview demonstration
 - Inspired by modern property management systems
 - Uses Apple's design philosophy for UI/UX
 
