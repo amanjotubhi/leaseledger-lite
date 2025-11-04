@@ -1,0 +1,52 @@
+1. npm i -g @angular/cli
+2. ng new leaseledger-web --style=scss --routing=false --skip-tests
+3. cd leaseledger-web && npm i
+4. in src/app/app.module.ts import HttpClientModule and add to imports[]
+5. create src/app/api.service.ts with the code below
+6. replace src/app/app.component.ts and src/app/app.component.html with the code below
+7. ng serve -o
+
+src/app/api.service.ts
+
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+@Injectable({ providedIn: 'root' })
+export class ApiService {
+  base = 'http://localhost:8000';
+  constructor(private http: HttpClient) {}
+  rentRoll() { return this.http.get<any[]>(`${this.base}/rent-roll`); }
+  aging()    { return this.http.get<any[]>(`${this.base}/ar-aging`); }
+}
+
+src/app/app.component.ts
+
+import { Component, OnInit } from '@angular/core';
+import { ApiService } from './api.service';
+@Component({ selector: 'app-root', templateUrl: './app.component.html' })
+export class AppComponent implements OnInit {
+  rent:any[]=[]; aging:any[]=[];
+  constructor(private api: ApiService) {}
+  ngOnInit(){ this.api.rentRoll().subscribe(d=>this.rent=d); this.api.aging().subscribe(d=>this.aging=d); }
+}
+
+src/app/app.component.html
+<div style="max-width:1000px;margin:24px auto;font-family:system-ui">
+  <h2>Rent Roll</h2>
+  <table>
+    <tr><th>Lease</th><th>Tenant</th><th>Unit</th><th>Charges</th><th>Payments</th><th>Balance</th></tr>
+    <tr *ngFor="let r of rent">
+      <td>{{r.lease_id}}</td><td>{{r.tenant_name}}</td><td>{{r.unit_no}}</td>
+      <td>{{r.monthly_charges}}</td><td>{{r.monthly_payments}}</td><td>{{r.month_balance}}</td>
+    </tr>
+  </table>
+  <h2 style="margin-top:24px">A/R Aging</h2>
+  <table>
+    <tr><th>Lease</th><th>Tenant</th><th>Unit</th><th>0–30</th><th>31–60</th><th>61–90</th><th>90+</th><th>Total</th></tr>
+    <tr *ngFor="let a of aging">
+      <td>{{a.lease_id}}</td><td>{{a.tenant_name}}</td><td>{{a.unit_no}}</td>
+      <td>{{a.bucket_0_30}}</td><td>{{a.bucket_31_60}}</td><td>{{a.bucket_61_90}}</td><td>{{a.bucket_90_plus}}</td><td>{{a.total_due}}</td>
+    </tr>
+  </table>
+</div>
+
+
