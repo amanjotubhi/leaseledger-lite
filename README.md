@@ -1,7 +1,6 @@
 # LeaseLedger Lite 🏢
 
-A professional property management demo application showcasing Rent Roll and Accounts Receivable Aging reports - perfect for Yardi interview demonstrations.
-
+A professional property management demo application showcasing Rent Roll and Accounts Receivable Aging reports.
 ## 🎯 Features
 
 - **FastAPI Backend**: High-performance REST API with SQLite (default) or Oracle database support
