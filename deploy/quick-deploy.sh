@@ -78,21 +78,38 @@ sudo systemctl restart leaseledger-api
 
 echo ""
 echo "🌐 Step 5: Configuring nginx..."
+
+# Verify Angular build exists
+if [ ! -d "leaseledger-web/dist/leaseledger-web/browser" ]; then
+    echo "⚠️  Warning: Angular build not found at expected location"
+    echo "   Checking build output..."
+    find leaseledger-web/dist -name "index.html" 2>/dev/null | head -1 || echo "   Build may have failed"
+fi
+
+# Copy nginx config
 sudo cp deploy/nginx.conf /etc/nginx/sites-available/leaseledger
 
 # Get public IP or use placeholder
 PUBLIC_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null || echo "_")
 sudo sed -i "s/server_name _;/server_name $PUBLIC_IP;/g" /etc/nginx/sites-available/leaseledger
 
-# Enable site
-sudo ln -sf /etc/nginx/sites-available/leaseledger /etc/nginx/sites-enabled/
+# Remove default nginx site
 sudo rm -f /etc/nginx/sites-enabled/default
 
-# Test nginx config
-sudo nginx -t
+# Enable our site
+sudo ln -sf /etc/nginx/sites-available/leaseledger /etc/nginx/sites-enabled/
 
-# Restart nginx
-sudo systemctl restart nginx
+# Test nginx config
+echo "Testing nginx configuration..."
+if sudo nginx -t; then
+    echo "✅ Nginx configuration is valid"
+    # Restart nginx
+    sudo systemctl restart nginx
+    echo "✅ Nginx restarted"
+else
+    echo "❌ Nginx configuration has errors!"
+    echo "   Check: sudo nginx -t"
+fi
 
 echo ""
 echo "✅ Deployment Complete!"
